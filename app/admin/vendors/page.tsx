@@ -22,7 +22,7 @@ export default function AdminVendorsPage() {
 
   async function approveVendor(id: string) {
     try {
-      await api.post(`/admin/vendors/${id}/approve`);
+      await api.post(`/admin/vendors/${id}/approve`, {});
       setVendors((prev) =>
         prev.map((v) =>
           v.id === id ? { ...v, status: "approved" } : v
@@ -35,7 +35,7 @@ export default function AdminVendorsPage() {
 
   async function suspendVendor(id: string) {
     try {
-      await api.post(`/admin/vendors/${id}/suspend`);
+      await api.post(`/admin/vendors/${id}/suspend`, {});
       setVendors((prev) =>
         prev.map((v) =>
           v.id === id ? { ...v, status: "suspended" } : v

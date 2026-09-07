@@ -22,7 +22,7 @@ export default function AdminPayoutsPage() {
 
   async function approvePayout(id: string) {
     try {
-      await api.post(`/admin/payouts/${id}/approve`);
+      await api.post(`/admin/payouts/${id}/approve`, {});
       setPayouts((prev) =>
         prev.map((p) =>
           p.id === id ? { ...p, status: "approved" } : p
@@ -35,7 +35,7 @@ export default function AdminPayoutsPage() {
 
   async function holdPayout(id: string) {
     try {
-      await api.post(`/admin/payouts/${id}/hold`);
+      await api.post(`/admin/payouts/${id}/hold`, {});
       setPayouts((prev) =>
         prev.map((p) =>
           p.id === id ? { ...p, status: "held" } : p
@@ -48,7 +48,7 @@ export default function AdminPayoutsPage() {
 
   async function releasePayout(id: string) {
     try {
-      await api.post(`/admin/payouts/${id}/release`);
+      await api.post(`/admin/payouts/${id}/release`, {});
       setPayouts((prev) =>
         prev.map((p) =>
           p.id === id ? { ...p, status: "released" } : p

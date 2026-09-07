@@ -22,7 +22,7 @@ export default function AdminListingsPage() {
 
   async function approveListing(id: string) {
     try {
-      await api.post(`/admin/listings/${id}/approve`);
+      await api.post(`/admin/listings/${id}/approve`, {});
       setListings((prev) =>
         prev.map((l) =>
           l.id === id ? { ...l, status: "approved" } : l
@@ -35,7 +35,7 @@ export default function AdminListingsPage() {
 
   async function rejectListing(id: string) {
     try {
-      await api.post(`/admin/listings/${id}/reject`);
+      await api.post(`/admin/listings/${id}/reject`, {});
       setListings((prev) =>
         prev.map((l) =>
           l.id === id ? { ...l, status: "rejected" } : l
@@ -48,7 +48,7 @@ export default function AdminListingsPage() {
 
   async function suspendListing(id: string) {
     try {
-      await api.post(`/admin/listings/${id}/suspend`);
+      await api.post(`/admin/listings/${id}/suspend`, {});
       setListings((prev) =>
         prev.map((l) =>
           l.id === id ? { ...l, status: "suspended" } : l
