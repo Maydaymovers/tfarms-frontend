@@ -5,8 +5,7 @@ import React, { useEffect, useState } from "react";
 export default function GMVDashboard() {
   const [gmv, setGmv] = useState<any>(null);
   const [ticker, setTicker] = useState<any>(null);
-  const [intelligence, setIntelligence] = useState<any>(null);
-  const [anomalies, setAnomalies] = useState<any>(null);
+  const [predictions, setPredictions] = useState<any>(null);
 
   useEffect(() => {
     async function load() {
@@ -31,27 +30,14 @@ export default function GMVDashboard() {
   }, []);
 
   useEffect(() => {
-    async function loadIntelligence() {
-      const res = await fetch("/api/intelligence");
+    async function loadPredictions() {
+      const res = await fetch("/api/predictions");
       const data = await res.json();
-      setIntelligence(data);
+      setPredictions(data);
     }
 
-    loadIntelligence();
-    const interval = setInterval(loadIntelligence, 7000);
-
-    return () => clearInterval(interval);
-  }, []);
-
-  useEffect(() => {
-    async function loadAnomalies() {
-      const res = await fetch("/api/anomalies");
-      const data = await res.json();
-      setAnomalies(data);
-    }
-
-    loadAnomalies();
-    const interval = setInterval(loadAnomalies, 8000);
+    loadPredictions();
+    const interval = setInterval(loadPredictions, 9000);
 
     return () => clearInterval(interval);
   }, []);
@@ -96,87 +82,48 @@ export default function GMVDashboard() {
         </div>
       </div>
 
-      <h2 style={styles.chartTitle}>Marketplace Intelligence</h2>
-      <div style={styles.intelligenceBox}>
-        {!intelligence && (
-          <p style={{ fontSize: "16px", color: "#555" }}>Loading intelligence...</p>
+      <h2 style={styles.chartTitle}>Marketplace Predictions</h2>
+      <div style={styles.predictionsBox}>
+        {!predictions && (
+          <p style={{ fontSize: "16px", color: "#555" }}>Loading predictions...</p>
         )}
 
-        {intelligence && (
-          <div style={styles.intelligenceGrid}>
-            <div style={styles.intelligenceItem}>
-              <strong>Risk Score</strong>
-              <span>{intelligence.riskScore}</span>
+        {predictions && (
+          <div style={styles.predictionsGrid}>
+            <div style={styles.predictionItem}>
+              <strong>GMV Next Hour</strong>
+              <span>${predictions.gmvNextHour.toLocaleString()}</span>
             </div>
 
-            <div style={styles.intelligenceItem}>
-              <strong>Demand Forecast</strong>
-              <span>{intelligence.demandForecast.toLocaleString()}</span>
+            <div style={styles.predictionItem}>
+              <strong>GMV Tomorrow</strong>
+              <span>${predictions.gmvTomorrow.toLocaleString()}</span>
             </div>
 
-            <div style={styles.intelligenceItem}>
-              <strong>GMV Projection</strong>
-              <span>${intelligence.gmvProjection.toLocaleString()}</span>
+            <div style={styles.predictionItem}>
+              <strong>Buyer Momentum Forecast</strong>
+              <span>{predictions.buyerMomentumForecast}</span>
             </div>
 
-            <div style={styles.intelligenceItem}>
-              <strong>Anomaly Probability</strong>
-              <span>{intelligence.anomalyProbability}</span>
+            <div style={styles.predictionItem}>
+              <strong>Vendor Load Forecast</strong>
+              <span>{predictions.vendorLoadForecast}</span>
             </div>
 
-            <div style={styles.intelligenceItem}>
-              <strong>Vendor Health</strong>
-              <span>{intelligence.vendorHealth}</span>
+            <div style={styles.predictionItem}>
+              <strong>Volatility Outlook</strong>
+              <span>{predictions.volatilityOutlook}</span>
             </div>
 
-            <div style={styles.intelligenceItem}>
-              <strong>Buyer Momentum</strong>
-              <span>{intelligence.buyerMomentum}</span>
-            </div>
-          </div>
-        )}
-      </div>
-
-      <h2 style={styles.chartTitle}>Marketplace Anomalies</h2>
-      <div style={styles.anomalyBox}>
-        {!anomalies && (
-          <p style={{ fontSize: "16px", color: "#555" }}>Loading anomalies...</p>
-        )}
-
-        {anomalies && (
-          <div>
-            <div style={styles.anomalyGrid}>
-              <div style={styles.anomalyItem}>
-                <strong>GMV Irregularity</strong>
-                <span>{anomalies.gmvIrregularity ? "Yes" : "No"}</span>
-              </div>
-              <div style={styles.anomalyItem}>
-                <strong>Vendor Outage Risk</strong>
-                <span>{anomalies.vendorOutageRisk ? "Yes" : "No"}</span>
-              </div>
-              <div style={styles.anomalyItem}>
-                <strong>Buyer Surge Risk</strong>
-                <span>{anomalies.buyerSurgeRisk ? "Yes" : "No"}</span>
-              </div>
-              <div style={styles.anomalyItem}>
-                <strong>Liquidity Dip</strong>
-                <span>{anomalies.liquidityDip ? "Yes" : "No"}</span>
-              </div>
-              <div style={styles.anomalyItem}>
-                <strong>Volatility Spike</strong>
-                <span>{anomalies.volatilitySpike ? "Yes" : "No"}</span>
-              </div>
-              <div style={styles.anomalyItem}>
-                <strong>Intelligence Mismatch</strong>
-                <span>{anomalies.intelligenceMismatch ? "Yes" : "No"}</span>
-              </div>
+            <div style={styles.predictionItem}>
+              <strong>Liquidity Forecast</strong>
+              <span>${predictions.liquidityForecast.toLocaleString()}</span>
             </div>
 
-            <ul style={styles.summaryList}>
-              {anomalies.summary.map((item: string, index: number) => (
-                <li key={index}>{item}</li>
-              ))}
-            </ul>
+            <div style={styles.predictionItem}>
+              <strong>Anomaly-Adjusted Risk</strong>
+              <span>{predictions.anomalyAdjustedRisk}</span>
+            </div>
           </div>
         )}
       </div>
@@ -249,53 +196,28 @@ const styles = {
     fontSize: "24px",
     marginBottom: "20px",
   },
-  intelligenceBox: {
+  predictionsBox: {
     padding: "20px",
-    backgroundColor: "#e1f5fe",
+    backgroundColor: "#ede7f6",
     borderRadius: "10px",
     marginBottom: "40px",
     boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
   },
-  intelligenceGrid: {
+  predictionsGrid: {
     display: "grid",
     gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
     gap: "20px",
   },
-  intelligenceItem: {
+  predictionItem: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "8px",
     padding: "15px",
     backgroundColor: "#ffffff",
     borderRadius: "8px",
     textAlign: "center",
     fontSize: "16px",
     boxShadow: "0 1px 4px rgba(0,0,0,0.1)",
-  },
-  anomalyBox: {
-    padding: "20px",
-    backgroundColor: "#fff3e0",
-    borderRadius: "10px",
-    marginBottom: "40px",
-    boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
-  },
-  anomalyGrid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
-    gap: "15px",
-    marginBottom: "15px",
-  },
-  anomalyItem: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "8px",
-    backgroundColor: "#fff",
-    padding: "12px",
-    borderRadius: "8px",
-    boxShadow: "0 1px 4px rgba(0,0,0,0.08)",
-  },
-  summaryList: {
-    margin: "0",
-    paddingLeft: "20px",
-    fontSize: "16px",
-    lineHeight: "1.8",
   },
   chart: {
     display: "flex",
