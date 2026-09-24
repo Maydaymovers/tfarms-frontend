@@ -10,6 +10,7 @@ export default function GMVDashboard() {
   const [predictions, setPredictions] = useState<any>(null);
   const [health, setHealth] = useState<any>(null);
   const [stability, setStability] = useState<any>(null);
+  const [resilience, setResilience] = useState<any>(null);
 
   useEffect(() => {
     async function load() {
@@ -89,6 +90,18 @@ export default function GMVDashboard() {
 
     loadStability();
     const interval = setInterval(loadStability, 10000);
+    return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    async function loadResilience() {
+      const res = await fetch("/api/resilience");
+      const data = await res.json();
+      setResilience(data);
+    }
+
+    loadResilience();
+    const interval = setInterval(loadResilience, 12000);
     return () => clearInterval(interval);
   }, []);
 
@@ -192,6 +205,21 @@ export default function GMVDashboard() {
         </div>}
       </div>
 
+      <h2 style={styles.chartTitle}>Marketplace Resilience Summary</h2>
+      <div style={styles.resilienceBox}>
+        {!resilience && <p style={styles.loading}>Loading resilience...</p>}
+        {resilience && <div style={styles.metricGrid}>
+          <Metric label="Overall Resilience Score" value={resilience.overallResilienceScore} />
+          <Metric label="Recovery Readiness" value={resilience.recoveryReadiness} />
+          <Metric label="Liquidity Buffer" value={resilience.liquidityBuffer} />
+          <Metric label="Market Stress Tolerance" value={resilience.marketStressTolerance} />
+          <Metric label="Vendor Recovery Index" value={resilience.vendorRecoveryIndex} />
+          <Metric label="Buyer Confidence Retention" value={resilience.buyerConfidenceRetention} />
+          <Metric label="Anomaly Absorption" value={resilience.anomalyAbsorption} />
+          <Metric label="Resilience Band" value={resilience.resilienceBand} />
+        </div>}
+      </div>
+
       <button style={styles.ctaButton}>+ Add Crop Listing</button>
     </div>
   );
@@ -215,6 +243,7 @@ const styles = {
   predictionsBox: { padding: "20px", backgroundColor: "#ede7f6", borderRadius: "10px", marginBottom: "40px", boxShadow: "0 2px 6px rgba(0,0,0,0.1)" },
   healthBox: { padding: "20px", backgroundColor: "#f3e5f5", borderRadius: "10px", marginBottom: "40px", boxShadow: "0 2px 6px rgba(0,0,0,0.1)" },
   stabilityBox: { padding: "20px", backgroundColor: "#e0f2f1", borderRadius: "10px", marginBottom: "40px", boxShadow: "0 2px 6px rgba(0,0,0,0.1)" },
+  resilienceBox: { padding: "20px", backgroundColor: "#e8f5e9", borderRadius: "10px", marginBottom: "40px", boxShadow: "0 2px 6px rgba(0,0,0,0.1)" },
   metricGrid: { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "20px" },
   metricItem: { display: "flex", flexDirection: "column", gap: "8px", backgroundColor: "#fff", padding: "15px", borderRadius: "8px", textAlign: "center", fontSize: "16px", boxShadow: "0 1px 4px rgba(0,0,0,0.08)" },
   loading: { fontSize: "16px", color: "#555" },
