@@ -1,7 +1,8 @@
 export default function HomePage() {
   return (
-    <main className="min-h-screen flex items-center justify-center bg-black text-white">
-      <h1 className="text-4xl font-bold">TFarms Frontend is Live</h1>
+    <main style={{ padding: "20px", fontFamily: "sans-serif" }}>
+      <h1>TFarms Frontend</h1>
+      <p>Your deployment is live and ready.</p>
     </main>
   );
 }
