@@ -6,6 +6,11 @@ export default function GMVDashboard() {
   const [gmv, setGmv] = useState<any>(null);
   const [ticker, setTicker] = useState<any>(null);
 
+  // NEW: Unified telemetry state
+  const [conditions, setConditions] = useState<any>(null);
+  const [telemetry, setTelemetry] = useState<any>(null);
+
+  // Load GMV
   useEffect(() => {
     async function load() {
       const res = await fetch("/api/gmv");
@@ -15,6 +20,7 @@ export default function GMVDashboard() {
     load();
   }, []);
 
+  // Load GMV ticker
   useEffect(() => {
     async function loadTicker() {
       const res = await fetch("/api/gmv/ticker");
@@ -24,7 +30,49 @@ export default function GMVDashboard() {
 
     loadTicker();
     const interval = setInterval(loadTicker, 5000);
+    return () => clearInterval(interval);
+  }, []);
 
+  // NEW: Load marketplace conditions
+  useEffect(() => {
+    async function loadConditions() {
+      const res = await fetch("/api/conditions");
+      const data = await res.json();
+      setConditions(data);
+    }
+
+    loadConditions();
+    const interval = setInterval(loadConditions, 5000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // NEW: Unified telemetry band fetch
+  useEffect(() => {
+    async function loadTelemetry() {
+      const resConditions = await fetch("/api/conditions");
+      const resPulse = await fetch("/api/pulse");
+      const resTicker = await fetch("/api/gmv/ticker");
+
+      const conditionsData = await resConditions.json();
+      const pulseData = await resPulse.json();
+      const tickerData = await resTicker.json();
+
+      setTelemetry({
+        heatIndex: conditionsData.heatIndex,
+        volatility: conditionsData.volatility,
+        liquidity: conditionsData.liquidity,
+        demandPressure: conditionsData.demandPressure,
+        recentOrders: pulseData.recentOrders,
+        recentPayouts: pulseData.recentPayouts,
+        activeVendors: pulseData.activeVendors,
+        activeBuyers: pulseData.activeBuyers,
+        gmv: tickerData.gmv,
+        timestamp: Date.now(),
+      });
+    }
+
+    loadTelemetry();
+    const interval = setInterval(loadTelemetry, 5000);
     return () => clearInterval(interval);
   }, []);
 
@@ -41,6 +89,57 @@ export default function GMVDashboard() {
       <h1 style={styles.title}>TFarms GMV Dashboard</h1>
       <p style={styles.subtitle}>Live Marketplace Revenue Overview</p>
 
+      {/* ⭐ NEW: Unified Marketplace Telemetry Band */}
+      <h2 style={styles.chartTitle}>Marketplace Telemetry</h2>
+      <div style={styles.telemetryBand}>
+        <div style={styles.telemetryItem}>
+          <span>GMV</span>
+          <span>{telemetry ? "$" + telemetry.gmv.toLocaleString() : "—"}</span>
+        </div>
+
+        <div style={styles.telemetryItem}>
+          <span>Heat</span>
+          <span>{telemetry ? telemetry.heatIndex : "—"}</span>
+        </div>
+
+        <div style={styles.telemetryItem}>
+          <span>Volatility</span>
+          <span>{telemetry ? telemetry.volatility + "%" : "—"}</span>
+        </div>
+
+        <div style={styles.telemetryItem}>
+          <span>Liquidity</span>
+          <span>
+            {telemetry ? "$" + telemetry.liquidity.toLocaleString() : "—"}
+          </span>
+        </div>
+
+        <div style={styles.telemetryItem}>
+          <span>Orders (5s)</span>
+          <span>{telemetry ? telemetry.recentOrders : "—"}</span>
+        </div>
+
+        <div style={styles.telemetryItem}>
+          <span>Payouts (5s)</span>
+          <span>{telemetry ? telemetry.recentPayouts : "—"}</span>
+        </div>
+
+        <div style={styles.telemetryItem}>
+          <span>Active Vendors</span>
+          <span>
+            {telemetry ? telemetry.activeVendors.toLocaleString() : "—"}
+          </span>
+        </div>
+
+        <div style={styles.telemetryItem}>
+          <span>Active Buyers</span>
+          <span>
+            {telemetry ? telemetry.activeBuyers.toLocaleString() : "—"}
+          </span>
+        </div>
+      </div>
+
+      {/* Existing GMV cards */}
       <div style={styles.grid}>
         <div style={styles.card}>
           <h2 style={styles.cardTitle}>Monthly GMV</h2>
@@ -68,6 +167,7 @@ export default function GMVDashboard() {
         </div>
       </div>
 
+      {/* Weekly GMV */}
       <h2 style={styles.chartTitle}>Weekly GMV Trend</h2>
       <div style={styles.chart}>
         {gmv.weekly.map((point: any, index: number) => (
@@ -83,6 +183,7 @@ export default function GMVDashboard() {
         ))}
       </div>
 
+      {/* GMV ticker */}
       <h2 style={styles.chartTitle}>Real-Time GMV Ticker</h2>
       <div style={styles.tickerBox}>
         <span>Live GMV:</span>
@@ -111,6 +212,26 @@ const styles = {
     color: "#555",
     marginBottom: "30px",
   },
+
+  /* ⭐ NEW: Telemetry Band Styles */
+  telemetryBand: {
+    display: "grid",
+    gridTemplateColumns: "repeat(8, 1fr)",
+    gap: "15px",
+    padding: "20px",
+    backgroundColor: "#e8f5e9",
+    borderRadius: "10px",
+    marginBottom: "40px",
+    boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
+  },
+  telemetryItem: {
+    display: "flex",
+    flexDirection: "column",
+    textAlign: "center",
+    fontSize: "16px",
+    fontWeight: "bold",
+  },
+
   grid: {
     display: "grid",
     gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
