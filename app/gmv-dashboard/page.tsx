@@ -11,6 +11,7 @@ export default function GMVDashboard() {
   const [health, setHealth] = useState<any>(null);
   const [stability, setStability] = useState<any>(null);
   const [resilience, setResilience] = useState<any>(null);
+  const [stress, setStress] = useState<any>(null);
 
   useEffect(() => {
     async function load() {
@@ -102,6 +103,18 @@ export default function GMVDashboard() {
 
     loadResilience();
     const interval = setInterval(loadResilience, 12000);
+    return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    async function loadStress() {
+      const res = await fetch("/api/stress");
+      const data = await res.json();
+      setStress(data);
+    }
+
+    loadStress();
+    const interval = setInterval(loadStress, 15000);
     return () => clearInterval(interval);
   }, []);
 
@@ -220,6 +233,34 @@ export default function GMVDashboard() {
         </div>}
       </div>
 
+      <h2 style={styles.chartTitle}>Marketplace Stress Simulation</h2>
+      <div style={styles.stressBox}>
+        {!stress && <p style={styles.loading}>Running stress simulation...</p>}
+        {stress && <>
+          <div style={styles.metricGrid}>
+            <Metric label="Cycle Pressure" value={stress.cyclePressure} />
+            <Metric label="Liquidity Shock" value={stress.liquidityShock} />
+            <Metric label="Vendor Outage Rate" value={stress.vendorOutageRate} />
+            <Metric label="Buyer Confidence Dip" value={stress.buyerConfidenceDip} />
+            <Metric label="Anomaly Cluster Load" value={stress.anomalyClusterLoad} />
+            <Metric label="Payout Rail Congestion" value={stress.payoutRailCongestion} />
+            <Metric label="Stress Band" value={stress.stressBand} />
+          </div>
+          {Array.isArray(stress.recoveryCurve) && (
+            <div style={styles.curveBox}>
+              <p style={styles.curveHeadline}>{stress.headline}</p>
+              <div style={styles.curveChart}>
+                {stress.recoveryCurve.map((point: number, index: number) => (
+                  <div key={index} style={styles.curveBarContainer}>
+                    <div style={{ ...styles.curveBar, height: `${Math.max(8, point)}px` }} />
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </>}
+      </div>
+
       <button style={styles.ctaButton}>+ Add Crop Listing</button>
     </div>
   );
@@ -244,6 +285,7 @@ const styles = {
   healthBox: { padding: "20px", backgroundColor: "#f3e5f5", borderRadius: "10px", marginBottom: "40px", boxShadow: "0 2px 6px rgba(0,0,0,0.1)" },
   stabilityBox: { padding: "20px", backgroundColor: "#e0f2f1", borderRadius: "10px", marginBottom: "40px", boxShadow: "0 2px 6px rgba(0,0,0,0.1)" },
   resilienceBox: { padding: "20px", backgroundColor: "#e8f5e9", borderRadius: "10px", marginBottom: "40px", boxShadow: "0 2px 6px rgba(0,0,0,0.1)" },
+  stressBox: { padding: "20px", backgroundColor: "#fdecea", borderRadius: "10px", marginBottom: "40px", boxShadow: "0 2px 6px rgba(0,0,0,0.1)" },
   metricGrid: { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "20px" },
   metricItem: { display: "flex", flexDirection: "column", gap: "8px", backgroundColor: "#fff", padding: "15px", borderRadius: "8px", textAlign: "center", fontSize: "16px", boxShadow: "0 1px 4px rgba(0,0,0,0.08)" },
   loading: { fontSize: "16px", color: "#555" },
@@ -254,4 +296,9 @@ const styles = {
   chartLabel: { marginTop: "8px", fontSize: "14px" },
   tickerBox: { padding: "15px", backgroundColor: "#e8f5e9", borderRadius: "8px", marginBottom: "40px", display: "flex", justifyContent: "space-between", fontSize: "20px", fontWeight: "bold", boxShadow: "0 2px 6px rgba(0,0,0,0.1)" },
   ctaButton: { padding: "15px 25px", fontSize: "18px", backgroundColor: "#2E7D32", color: "#fff", border: "none", borderRadius: "8px", cursor: "pointer" },
+  curveBox: { marginTop: "20px", padding: "15px", backgroundColor: "rgba(255,255,255,0.4)", borderRadius: "8px" },
+  curveHeadline: { margin: "0 0 12px", fontWeight: 700, color: "#333" },
+  curveChart: { display: "flex", alignItems: "flex-end", gap: "8px", height: "80px" },
+  curveBarContainer: { flex: 1, display: "flex", alignItems: "flex-end", justifyContent: "center", height: "100%" },
+  curveBar: { width: "100%", maxWidth: "12px", backgroundColor: "#d9534f", borderRadius: "4px 4px 0 0" },
 };
