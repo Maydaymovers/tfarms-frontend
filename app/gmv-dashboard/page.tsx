@@ -5,7 +5,7 @@ import React, { useEffect, useState } from "react";
 export default function GMVDashboard() {
   const [gmv, setGmv] = useState<any>(null);
   const [ticker, setTicker] = useState<any>(null);
-  const [predictions, setPredictions] = useState<any>(null);
+  const [health, setHealth] = useState<any>(null);
 
   useEffect(() => {
     async function load() {
@@ -30,14 +30,14 @@ export default function GMVDashboard() {
   }, []);
 
   useEffect(() => {
-    async function loadPredictions() {
-      const res = await fetch("/api/predictions");
+    async function loadHealth() {
+      const res = await fetch("/api/health");
       const data = await res.json();
-      setPredictions(data);
+      setHealth(data);
     }
 
-    loadPredictions();
-    const interval = setInterval(loadPredictions, 9000);
+    loadHealth();
+    const interval = setInterval(loadHealth, 9000);
 
     return () => clearInterval(interval);
   }, []);
@@ -82,52 +82,6 @@ export default function GMVDashboard() {
         </div>
       </div>
 
-      <h2 style={styles.chartTitle}>Marketplace Predictions</h2>
-      <div style={styles.predictionsBox}>
-        {!predictions && (
-          <p style={{ fontSize: "16px", color: "#555" }}>Loading predictions...</p>
-        )}
-
-        {predictions && (
-          <div style={styles.predictionsGrid}>
-            <div style={styles.predictionItem}>
-              <strong>GMV Next Hour</strong>
-              <span>${predictions.gmvNextHour.toLocaleString()}</span>
-            </div>
-
-            <div style={styles.predictionItem}>
-              <strong>GMV Tomorrow</strong>
-              <span>${predictions.gmvTomorrow.toLocaleString()}</span>
-            </div>
-
-            <div style={styles.predictionItem}>
-              <strong>Buyer Momentum Forecast</strong>
-              <span>{predictions.buyerMomentumForecast}</span>
-            </div>
-
-            <div style={styles.predictionItem}>
-              <strong>Vendor Load Forecast</strong>
-              <span>{predictions.vendorLoadForecast}</span>
-            </div>
-
-            <div style={styles.predictionItem}>
-              <strong>Volatility Outlook</strong>
-              <span>{predictions.volatilityOutlook}</span>
-            </div>
-
-            <div style={styles.predictionItem}>
-              <strong>Liquidity Forecast</strong>
-              <span>${predictions.liquidityForecast.toLocaleString()}</span>
-            </div>
-
-            <div style={styles.predictionItem}>
-              <strong>Anomaly-Adjusted Risk</strong>
-              <span>{predictions.anomalyAdjustedRisk}</span>
-            </div>
-          </div>
-        )}
-      </div>
-
       <h2 style={styles.chartTitle}>Weekly GMV Trend</h2>
       <div style={styles.chart}>
         {gmv.weekly.map((point: any, index: number) => (
@@ -147,6 +101,57 @@ export default function GMVDashboard() {
       <div style={styles.tickerBox}>
         <span>Live GMV:</span>
         <span>${ticker ? ticker.gmv.toLocaleString() : "—"}</span>
+      </div>
+
+      <h2 style={styles.chartTitle}>Marketplace Health Summary</h2>
+      <div style={styles.healthBox}>
+        {!health && (
+          <p style={{ fontSize: "16px", color: "#555" }}>Loading marketplace health...</p>
+        )}
+
+        {health && (
+          <div style={styles.healthGrid}>
+            <div style={styles.healthItem}>
+              <strong>Overall Score</strong>
+              <span>{health.overallScore}</span>
+            </div>
+
+            <div style={styles.healthItem}>
+              <strong>Risk</strong>
+              <span>{health.riskLevel}</span>
+            </div>
+
+            <div style={styles.healthItem}>
+              <strong>GMV Trend</strong>
+              <span>{health.gmvTrend}</span>
+            </div>
+
+            <div style={styles.healthItem}>
+              <strong>Liquidity</strong>
+              <span>{health.liquidityState}</span>
+            </div>
+
+            <div style={styles.healthItem}>
+              <strong>Vendor Stability</strong>
+              <span>{health.vendorStability}</span>
+            </div>
+
+            <div style={styles.healthItem}>
+              <strong>Buyer Confidence</strong>
+              <span>{health.buyerConfidence}</span>
+            </div>
+
+            <div style={styles.healthItem}>
+              <strong>Volatility Pressure</strong>
+              <span>{health.volatilityPressure}</span>
+            </div>
+
+            <div style={styles.healthItem}>
+              <strong>Forecast Confidence</strong>
+              <span>{health.forecastConfidence}</span>
+            </div>
+          </div>
+        )}
       </div>
 
       <button style={styles.ctaButton}>+ Add Crop Listing</button>
@@ -196,29 +201,6 @@ const styles = {
     fontSize: "24px",
     marginBottom: "20px",
   },
-  predictionsBox: {
-    padding: "20px",
-    backgroundColor: "#ede7f6",
-    borderRadius: "10px",
-    marginBottom: "40px",
-    boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
-  },
-  predictionsGrid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
-    gap: "20px",
-  },
-  predictionItem: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "8px",
-    padding: "15px",
-    backgroundColor: "#ffffff",
-    borderRadius: "8px",
-    textAlign: "center",
-    fontSize: "16px",
-    boxShadow: "0 1px 4px rgba(0,0,0,0.1)",
-  },
   chart: {
     display: "flex",
     alignItems: "flex-end",
@@ -249,6 +231,29 @@ const styles = {
     fontSize: "20px",
     fontWeight: "bold",
     boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
+  },
+  healthBox: {
+    padding: "20px",
+    backgroundColor: "#f3e5f5",
+    borderRadius: "10px",
+    marginBottom: "40px",
+    boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
+  },
+  healthGrid: {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
+    gap: "20px",
+  },
+  healthItem: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "8px",
+    backgroundColor: "#fff",
+    padding: "15px",
+    borderRadius: "8px",
+    textAlign: "center",
+    fontSize: "16px",
+    boxShadow: "0 1px 4px rgba(0,0,0,0.08)",
   },
   ctaButton: {
     padding: "15px 25px",
