@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { api } from "@/lib/api/client";
 import Link from "next/link";
 import ShockScenarioPanel from "./ShockScenarioPanel";
+import RevenueIntelligencePanel from "./RevenueIntelligencePanel";
 
 export default function AdminDashboardPage() {
   const [stats, setStats] = useState<any>(null);
@@ -50,6 +51,8 @@ export default function AdminDashboardPage() {
           <p className="text-white text-3xl font-bold">{stats.orders || 0}</p>
         </div>
       </div>
+
+      <RevenueIntelligencePanel />
 
       <ShockScenarioPanel />
 
