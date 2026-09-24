@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import type { ShockScenario } from "@/lib/sse/types";
 
+export const dynamic = "force-dynamic";
+
 const SCENARIOS: ShockScenario[] = [
   {
     id: "liquidity_crunch",
@@ -125,15 +127,22 @@ export async function GET(req: Request) {
   const id = searchParams.get("id");
 
   if (!id) {
-    return NextResponse.json({
-      scenarios: SCENARIOS.map(({ id, name, severityBand, shockVector }) => ({
-        id,
-        name,
-        severityBand,
-        shockVector,
-      })),
-      timestamp,
-    });
+    return NextResponse.json(
+      {
+        scenarios: SCENARIOS.map(({ id, name, severityBand, shockVector }) => ({
+          id,
+          name,
+          severityBand,
+          shockVector,
+        })),
+        timestamp,
+      },
+      {
+        headers: {
+          "Cache-Control": "no-store",
+        },
+      }
+    );
   }
 
   const scenario = SCENARIOS.find((item) => item.id === id);
@@ -141,9 +150,21 @@ export async function GET(req: Request) {
   if (!scenario) {
     return NextResponse.json(
       { error: "Shock scenario not found", id, timestamp },
-      { status: 404 }
+      {
+        status: 404,
+        headers: {
+          "Cache-Control": "no-store",
+        },
+      }
     );
   }
 
-  return NextResponse.json({ scenario, timestamp });
+  return NextResponse.json(
+    { scenario, timestamp },
+    {
+      headers: {
+        "Cache-Control": "no-store",
+      },
+    }
+  );
 }

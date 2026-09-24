@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import type { RevenueIntelligenceData } from "@/lib/revenue/types";
 
+export const dynamic = "force-dynamic";
+
 const DATA: RevenueIntelligenceData = {
   dailyGmv: {
     date: "2026-09-24",
@@ -102,8 +104,15 @@ const DATA: RevenueIntelligenceData = {
 };
 
 export async function GET() {
-  return NextResponse.json({
-    data: DATA,
-    timestamp: Date.now(),
-  });
+  return NextResponse.json(
+    {
+      data: DATA,
+      timestamp: Date.now(),
+    },
+    {
+      headers: {
+        "Cache-Control": "no-store",
+      },
+    }
+  );
 }
