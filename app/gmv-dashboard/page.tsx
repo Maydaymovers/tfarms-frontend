@@ -11,6 +11,7 @@ export default function GMVDashboard() {
   const [telemetry, setTelemetry] = useState<any>(null);
   const [alerts, setAlerts] = useState<any[]>([]);
   const [commandResult, setCommandResult] = useState<string | null>(null);
+  const [automations, setAutomations] = useState<any[]>([]);
 
   // Load GMV
   useEffect(() => {
@@ -101,6 +102,24 @@ export default function GMVDashboard() {
     const data = await res.json();
     setCommandResult(data.result);
   }
+
+  // NEW: Marketplace automations fetch
+  useEffect(() => {
+    async function loadAutomations() {
+      const res = await fetch("/api/automations");
+      const data = await res.json();
+
+      setAutomations((prev) => {
+        const updated = [data, ...prev];
+        return updated.slice(0, 10);
+      });
+    }
+
+    loadAutomations();
+    const interval = setInterval(loadAutomations, 6000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   if (!gmv) {
     return (
@@ -209,6 +228,22 @@ export default function GMVDashboard() {
           <strong>Result:</strong> {commandResult}
         </div>
       )}
+
+      {/* NEW: Marketplace Automations */}
+      <h2 style={styles.chartTitle}>Marketplace Automations</h2>
+
+      <div style={styles.automationBox}>
+        {automations.map((cycle, index) => (
+          <div key={index} style={styles.automationCycle}>
+            <strong>{new Date(cycle.timestamp).toLocaleTimeString()}</strong>
+            <ul>
+              {cycle.events.map((evt: string, i: number) => (
+                <li key={i}>{evt}</li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </div>
 
       {/* Existing GMV cards */}
       <div style={styles.grid}>
@@ -337,6 +372,18 @@ const styles = {
     fontSize: "18px",
     boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
     marginBottom: "40px",
+  },
+  automationBox: {
+    padding: "20px",
+    backgroundColor: "#f3e5f5",
+    borderRadius: "10px",
+    marginBottom: "40px",
+    boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
+  },
+  automationCycle: {
+    padding: "10px 0",
+    borderBottom: "1px solid #ddd",
+    fontSize: "16px",
   },
 
   grid: {
