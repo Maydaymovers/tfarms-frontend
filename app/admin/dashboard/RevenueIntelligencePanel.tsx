@@ -119,7 +119,7 @@ export default function RevenueIntelligencePanel() {
               className="h-36 w-full"
               role="img"
               aria-label={`Revenue forecast points: ${data.forecastPoints
-                .map((point) => `${point.label} ${point.gmv}`)
+                .map((point) => `${point.label} ${toCurrency(point.gmv)}`)
                 .join(", ")}`}
             >
               <polyline
@@ -234,9 +234,7 @@ export default function RevenueIntelligencePanel() {
                   <p className="font-medium text-white">{item.listingTitle}</p>
                   <p>
                     Current {toCurrency(item.currentPrice)} → Suggested{" "}
-                    {toCurrency(item.suggestedPrice)} • Revenue gap{" "}
-                    {item.revenueGap >= 0 ? "+" : ""}
-                    {toCurrency(item.revenueGap)}
+                    {toCurrency(item.suggestedPrice)} • Revenue gap {toCurrency(item.revenueGap)}
                   </p>
                 </li>
               ))}
