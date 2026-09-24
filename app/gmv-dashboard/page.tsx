@@ -10,6 +10,7 @@ export default function GMVDashboard() {
   const [conditions, setConditions] = useState<any>(null);
   const [telemetry, setTelemetry] = useState<any>(null);
   const [alerts, setAlerts] = useState<any[]>([]);
+  const [commandResult, setCommandResult] = useState<string | null>(null);
 
   // Load GMV
   useEffect(() => {
@@ -91,6 +92,16 @@ export default function GMVDashboard() {
     return () => clearInterval(interval);
   }, []);
 
+  async function runCommand(cmd: string) {
+    const res = await fetch("/api/commands", {
+      method: "POST",
+      body: JSON.stringify({ command: cmd }),
+    });
+
+    const data = await res.json();
+    setCommandResult(data.result);
+  }
+
   if (!gmv) {
     return (
       <div style={{ padding: 40, fontSize: 24 }}>
@@ -167,6 +178,37 @@ export default function GMVDashboard() {
           </div>
         ))}
       </div>
+
+      {/* NEW: Marketplace Command Console */}
+      <h2 style={styles.chartTitle}>Marketplace Command Console</h2>
+
+      <div style={styles.consoleBox}>
+        <button style={styles.consoleButton} onClick={() => runCommand("boost_vendors")}>
+          Boost Vendors
+        </button>
+
+        <button style={styles.consoleButton} onClick={() => runCommand("slow_buyers")}>
+          Slow Buyers
+        </button>
+
+        <button style={styles.consoleButton} onClick={() => runCommand("simulate_gmv_spike")}>
+          Simulate GMV Spike
+        </button>
+
+        <button style={styles.consoleButton} onClick={() => runCommand("ack_alerts")}>
+          Acknowledge Alerts
+        </button>
+
+        <button style={styles.consoleButton} onClick={() => runCommand("reset_conditions")}>
+          Reset Conditions
+        </button>
+      </div>
+
+      {commandResult && (
+        <div style={styles.consoleResult}>
+          <strong>Result:</strong> {commandResult}
+        </div>
+      )}
 
       {/* Existing GMV cards */}
       <div style={styles.grid}>
@@ -272,6 +314,29 @@ const styles = {
     fontSize: "18px",
     fontWeight: "bold",
     borderBottom: "1px solid #eee",
+  },
+  consoleBox: {
+    display: "flex",
+    flexWrap: "wrap",
+    gap: "15px",
+    marginBottom: "30px",
+  },
+  consoleButton: {
+    padding: "12px 18px",
+    backgroundColor: "#1976D2",
+    color: "#fff",
+    border: "none",
+    borderRadius: "6px",
+    cursor: "pointer",
+    fontSize: "16px",
+  },
+  consoleResult: {
+    padding: "15px",
+    backgroundColor: "#E3F2FD",
+    borderRadius: "8px",
+    fontSize: "18px",
+    boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
+    marginBottom: "40px",
   },
 
   grid: {
