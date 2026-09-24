@@ -68,6 +68,11 @@ export default function ShockScenarioPanel() {
 
       try {
         const response = await fetch("/api/shock-scenarios", {
+          // TEMPORARY DEVELOPMENT-ONLY HEADER.
+          // Do not treat this as production authorization.
+          headers: {
+            "x-admin": "true",
+          },
           signal: controller.signal,
         });
 
@@ -128,7 +133,14 @@ export default function ShockScenarioPanel() {
       try {
         const response = await fetch(
           `/api/shock-scenarios?id=${encodeURIComponent(selectedId)}`,
-          { signal: controller.signal }
+          {
+            // TEMPORARY DEVELOPMENT-ONLY HEADER.
+            // Do not treat this as production authorization.
+            headers: {
+              "x-admin": "true",
+            },
+            signal: controller.signal,
+          }
         );
 
         if (!response.ok) {
