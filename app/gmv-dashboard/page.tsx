@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 
 export default function GMVDashboard() {
   const [gmv, setGmv] = useState<any>(null);
+  const [ticker, setTicker] = useState<any>(null);
 
   useEffect(() => {
     async function load() {
@@ -12,6 +13,19 @@ export default function GMVDashboard() {
       setGmv(data);
     }
     load();
+  }, []);
+
+  useEffect(() => {
+    async function loadTicker() {
+      const res = await fetch("/api/gmv/ticker");
+      const data = await res.json();
+      setTicker(data);
+    }
+
+    loadTicker();
+    const interval = setInterval(loadTicker, 5000);
+
+    return () => clearInterval(interval);
   }, []);
 
   if (!gmv) {
@@ -69,9 +83,13 @@ export default function GMVDashboard() {
         ))}
       </div>
 
-      <button style={styles.ctaButton}>
-        + Add Crop Listing
-      </button>
+      <h2 style={styles.chartTitle}>Real-Time GMV Ticker</h2>
+      <div style={styles.tickerBox}>
+        <span>Live GMV:</span>
+        <span>${ticker ? ticker.gmv.toLocaleString() : "—"}</span>
+      </div>
+
+      <button style={styles.ctaButton}>+ Add Crop Listing</button>
     </div>
   );
 }
@@ -137,6 +155,17 @@ const styles = {
   chartLabel: {
     marginTop: "8px",
     fontSize: "14px",
+  },
+  tickerBox: {
+    padding: "15px",
+    backgroundColor: "#e8f5e9",
+    borderRadius: "8px",
+    marginBottom: "40px",
+    display: "flex",
+    justifyContent: "space-between",
+    fontSize: "20px",
+    fontWeight: "bold",
+    boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
   },
   ctaButton: {
     padding: "15px 25px",
