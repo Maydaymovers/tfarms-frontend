@@ -9,6 +9,7 @@ export default function GMVDashboard() {
   // NEW: Unified telemetry state
   const [conditions, setConditions] = useState<any>(null);
   const [telemetry, setTelemetry] = useState<any>(null);
+  const [alerts, setAlerts] = useState<any[]>([]);
 
   // Load GMV
   useEffect(() => {
@@ -76,6 +77,20 @@ export default function GMVDashboard() {
     return () => clearInterval(interval);
   }, []);
 
+  // NEW: Marketplace alerts fetch
+  useEffect(() => {
+    async function loadAlerts() {
+      const res = await fetch("/api/alerts");
+      const data = await res.json();
+      setAlerts(data.alerts);
+    }
+
+    loadAlerts();
+    const interval = setInterval(loadAlerts, 5000);
+
+    return () => clearInterval(interval);
+  }, []);
+
   if (!gmv) {
     return (
       <div style={{ padding: 40, fontSize: 24 }}>
@@ -137,6 +152,20 @@ export default function GMVDashboard() {
             {telemetry ? telemetry.activeBuyers.toLocaleString() : "—"}
           </span>
         </div>
+      </div>
+
+      {/* NEW: Marketplace Alerts */}
+      <h2 style={styles.chartTitle}>Marketplace Alerts</h2>
+      <div style={styles.alertBox}>
+        {alerts.length === 0 && (
+          <p style={{ fontSize: "16px", color: "#555" }}>No active alerts</p>
+        )}
+
+        {alerts.map((alert, index) => (
+          <div key={index} style={styles.alertItem}>
+            ⚠️ {alert}
+          </div>
+        ))}
       </div>
 
       {/* Existing GMV cards */}
@@ -230,6 +259,19 @@ const styles = {
     textAlign: "center",
     fontSize: "16px",
     fontWeight: "bold",
+  },
+  alertBox: {
+    padding: "20px",
+    backgroundColor: "#fff8e1",
+    borderRadius: "10px",
+    marginBottom: "40px",
+    boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
+  },
+  alertItem: {
+    padding: "10px 0",
+    fontSize: "18px",
+    fontWeight: "bold",
+    borderBottom: "1px solid #eee",
   },
 
   grid: {
