@@ -6,6 +6,7 @@ export default function GMVDashboard() {
   const [gmv, setGmv] = useState<any>(null);
   const [ticker, setTicker] = useState<any>(null);
   const [intelligence, setIntelligence] = useState<any>(null);
+  const [anomalies, setAnomalies] = useState<any>(null);
 
   useEffect(() => {
     async function load() {
@@ -38,6 +39,19 @@ export default function GMVDashboard() {
 
     loadIntelligence();
     const interval = setInterval(loadIntelligence, 7000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    async function loadAnomalies() {
+      const res = await fetch("/api/anomalies");
+      const data = await res.json();
+      setAnomalies(data);
+    }
+
+    loadAnomalies();
+    const interval = setInterval(loadAnomalies, 8000);
 
     return () => clearInterval(interval);
   }, []);
@@ -119,6 +133,50 @@ export default function GMVDashboard() {
               <strong>Buyer Momentum</strong>
               <span>{intelligence.buyerMomentum}</span>
             </div>
+          </div>
+        )}
+      </div>
+
+      <h2 style={styles.chartTitle}>Marketplace Anomalies</h2>
+      <div style={styles.anomalyBox}>
+        {!anomalies && (
+          <p style={{ fontSize: "16px", color: "#555" }}>Loading anomalies...</p>
+        )}
+
+        {anomalies && (
+          <div>
+            <div style={styles.anomalyGrid}>
+              <div style={styles.anomalyItem}>
+                <strong>GMV Irregularity</strong>
+                <span>{anomalies.gmvIrregularity ? "Yes" : "No"}</span>
+              </div>
+              <div style={styles.anomalyItem}>
+                <strong>Vendor Outage Risk</strong>
+                <span>{anomalies.vendorOutageRisk ? "Yes" : "No"}</span>
+              </div>
+              <div style={styles.anomalyItem}>
+                <strong>Buyer Surge Risk</strong>
+                <span>{anomalies.buyerSurgeRisk ? "Yes" : "No"}</span>
+              </div>
+              <div style={styles.anomalyItem}>
+                <strong>Liquidity Dip</strong>
+                <span>{anomalies.liquidityDip ? "Yes" : "No"}</span>
+              </div>
+              <div style={styles.anomalyItem}>
+                <strong>Volatility Spike</strong>
+                <span>{anomalies.volatilitySpike ? "Yes" : "No"}</span>
+              </div>
+              <div style={styles.anomalyItem}>
+                <strong>Intelligence Mismatch</strong>
+                <span>{anomalies.intelligenceMismatch ? "Yes" : "No"}</span>
+              </div>
+            </div>
+
+            <ul style={styles.summaryList}>
+              {anomalies.summary.map((item: string, index: number) => (
+                <li key={index}>{item}</li>
+              ))}
+            </ul>
           </div>
         )}
       </div>
@@ -210,6 +268,34 @@ const styles = {
     textAlign: "center",
     fontSize: "16px",
     boxShadow: "0 1px 4px rgba(0,0,0,0.1)",
+  },
+  anomalyBox: {
+    padding: "20px",
+    backgroundColor: "#fff3e0",
+    borderRadius: "10px",
+    marginBottom: "40px",
+    boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
+  },
+  anomalyGrid: {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
+    gap: "15px",
+    marginBottom: "15px",
+  },
+  anomalyItem: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "8px",
+    backgroundColor: "#fff",
+    padding: "12px",
+    borderRadius: "8px",
+    boxShadow: "0 1px 4px rgba(0,0,0,0.08)",
+  },
+  summaryList: {
+    margin: "0",
+    paddingLeft: "20px",
+    fontSize: "16px",
+    lineHeight: "1.8",
   },
   chart: {
     display: "flex",
