@@ -1,61 +1,150 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 
-const orders = [
-  { id: "TF-1048", customer: "Green Valley Co-op", channel: "Marketplace", status: "Paid", amount: 12480, date: "Today, 10:42 AM" },
-  { id: "TF-1047", customer: "Harvest House", channel: "Direct", status: "Paid", amount: 8920, date: "Today, 9:18 AM" },
-  { id: "TF-1046", customer: "Oak & Field", channel: "Wholesale", status: "Pending", amount: 6540, date: "Yesterday, 4:05 PM" },
-  { id: "TF-1045", customer: "Sunrise Markets", channel: "Marketplace", status: "Paid", amount: 4210, date: "Yesterday, 1:27 PM" },
-  { id: "TF-1044", customer: "The Local Pantry", channel: "Direct", status: "Refunded", amount: 2180, date: "Sep 21, 11:02 AM" },
-];
+export default function GMVDashboard() {
+  const [gmv, setGmv] = useState<any>(null);
 
-const formatCurrency = (value: number) =>
-  new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(value);
+  useEffect(() => {
+    async function load() {
+      const res = await fetch("/api/gmv");
+      const data = await res.json();
+      setGmv(data);
+    }
+    load();
+  }, []);
 
-export default function GMVDashboardPage() {
-  const [range, setRange] = useState("30 days");
-  const [query, setQuery] = useState("");
-
-  const filteredOrders = useMemo(
-    () => orders.filter((order) => `${order.id} ${order.customer} ${order.channel}`.toLowerCase().includes(query.toLowerCase())),
-    [query]
-  );
+  if (!gmv) {
+    return (
+      <div style={{ padding: 40, fontSize: 24 }}>
+        Loading GMV...
+      </div>
+    );
+  }
 
   return (
-    <main className="dashboard-shell">
-      <aside className="sidebar">
-        <div className="brand"><span className="brand-mark">T</span><span>TFarms</span></div>
-        <nav aria-label="Main navigation">
-          <a className="nav-item active" href="#overview">Overview</a>
-          <a className="nav-item" href="#orders">Orders</a>
-          <a className="nav-item" href="#products">Products</a>
-          <a className="nav-item" href="#customers">Customers</a>
-        </nav>
-        <div className="sidebar-footer"><div className="avatar">DM</div><div><strong>Damion May</strong><small>Admin</small></div></div>
-      </aside>
+    <div style={styles.container}>
+      <h1 style={styles.title}>TFarms GMV Dashboard</h1>
+      <p style={styles.subtitle}>Live Marketplace Revenue Overview</p>
 
-      <section className="content">
-        <header className="topbar"><div><p className="eyebrow">BUSINESS INTELLIGENCE</p><h1>GMV Dashboard</h1></div><button className="export-button" onClick={() => window.print()}>Export report</button></header>
-
-        <div className="toolbar"><div className="live-status"><span /> Live data</div><label className="range-label">Period <select value={range} onChange={(event) => setRange(event.target.value)}><option>7 days</option><option>30 days</option><option>90 days</option></select></label></div>
-
-        <div className="metrics" id="overview">
-          <article className="metric-card featured"><div className="metric-label">Gross merchandise value <span className="info">i</span></div><div className="metric-value">$148,320</div><div className="metric-change positive">↗ 18.4% <span>vs. previous period</span></div><div className="sparkline"><i /><i /><i /><i /><i /><i /><i /><i /><i /><i /></div></article>
-          <article className="metric-card"><div className="metric-label">Total orders</div><div className="metric-value">1,284</div><div className="metric-change positive">↗ 12.7% <span>vs. previous period</span></div></article>
-          <article className="metric-card"><div className="metric-label">Average order value</div><div className="metric-value">$115.51</div><div className="metric-change positive">↗ 4.9% <span>vs. previous period</span></div></article>
-          <article className="metric-card"><div className="metric-label">Active sellers</div><div className="metric-value">342</div><div className="metric-change positive">↗ 8.2% <span>vs. previous period</span></div></article>
+      <div style={styles.grid}>
+        <div style={styles.card}>
+          <h2 style={styles.cardTitle}>Monthly GMV</h2>
+          <p style={styles.value}>${gmv.gmvMonthly.toLocaleString()}</p>
         </div>
 
-        <div className="grid-row">
-          <section className="panel chart-panel"><div className="panel-heading"><div><h2>GMV over time</h2><p>Revenue generated across all channels</p></div><span className="chart-total">$148.3k</span></div><div className="chart"><div className="y-axis"><span>$40k</span><span>$30k</span><span>$20k</span><span>$10k</span><span>$0</span></div><div className="chart-area"><div className="grid-lines" /><svg viewBox="0 0 700 230" role="img" aria-label="GMV trending upward"><defs><linearGradient id="fill" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stopColor="#55d68b" stopOpacity=".35" /><stop offset="100%" stopColor="#55d68b" stopOpacity="0" /></linearGradient></defs><path d="M0 190 C45 180 55 150 100 164 S155 130 200 142 S260 100 300 120 S350 75 400 95 S450 68 500 82 S560 35 600 55 S665 20 700 28 L700 230 L0 230Z" fill="url(#fill)" /><path d="M0 190 C45 180 55 150 100 164 S155 130 200 142 S260 100 300 120 S350 75 400 95 S450 68 500 82 S560 35 600 55 S665 20 700 28" fill="none" stroke="#55d68b" strokeWidth="3" /></svg><div className="x-axis"><span>Sep 1</span><span>Sep 8</span><span>Sep 15</span><span>Sep 22</span><span>Sep 30</span></div></div></div></section>
-          <section className="panel channel-panel"><div className="panel-heading"><div><h2>Sales by channel</h2><p>Where your GMV comes from</p></div></div><div className="donut-wrap"><div className="donut"><strong>148k</strong><small>Total GMV</small></div><div className="legend"><div><b className="dot green" />Marketplace <strong>52%</strong></div><div><b className="dot blue" />Direct <strong>31%</strong></div><div><b className="dot orange" />Wholesale <strong>17%</strong></div></div></div></section>
+        <div style={styles.card}>
+          <h2 style={styles.cardTitle}>Daily GMV</h2>
+          <p style={styles.value}>${gmv.gmvDaily.toLocaleString()}</p>
         </div>
 
-        <section className="panel orders-panel" id="orders"><div className="panel-heading"><div><h2>Recent orders</h2><p>Your latest marketplace activity</p></div><div className="order-actions"><input aria-label="Search orders" placeholder="Search orders..." value={query} onChange={(event) => setQuery(event.target.value)} /><a href="#orders">View all →</a></div></div><div className="table-wrap"><table><thead><tr><th>Order</th><th>Customer</th><th>Channel</th><th>Status</th><th className="align-right">Amount</th></tr></thead><tbody>{filteredOrders.map((order) => <tr key={order.id}><td><strong>{order.id}</strong><small>{order.date}</small></td><td>{order.customer}</td><td>{order.channel}</td><td><span className={`status ${order.status.toLowerCase()}`}>{order.status}</span></td><td className="align-right"><strong>{formatCurrency(order.amount)}</strong></td></tr>)}</tbody></table>{filteredOrders.length === 0 && <p className="empty">No orders match your search.</p>}</div></section>
-      </section>
+        <div style={styles.card}>
+          <h2 style={styles.cardTitle}>Active Vendors</h2>
+          <p style={styles.value}>{gmv.vendors.toLocaleString()}</p>
+        </div>
 
-      <style jsx>{`\n        :global(*){box-sizing:border-box}:global(body){background:#f5f8f6;color:#17241d;font-family:Arial,Helvetica,sans-serif}.dashboard-shell{display:flex;min-height:100vh}.sidebar{background:#10271c;color:#dce9e0;width:236px;padding:28px 18px;display:flex;flex-direction:column}.brand{display:flex;align-items:center;gap:10px;color:#fff;font-size:20px;font-weight:700;margin:0 12px 52px}.brand-mark{background:#50d784;color:#10271c;border-radius:9px;display:grid;place-items:center;width:30px;height:30px}.nav-item{display:block;color:#aabdb1;text-decoration:none;border-radius:8px;padding:13px 14px;margin:4px 0;font-size:14px}.nav-item.active,.nav-item:hover{background:#1d4430;color:#fff}.sidebar-footer{border-top:1px solid #2b4738;margin-top:auto;padding:20px 8px 0;display:flex;align-items:center;gap:10px;font-size:12px}.avatar{background:#d2a16b;color:#fff;border-radius:50%;width:34px;height:34px;display:grid;place-items:center;font-size:11px;font-weight:bold}.sidebar-footer small{display:block;color:#8ca497;margin-top:3px}.content{width:100%;max-width:1440px;padding:42px 54px}.topbar{display:flex;justify-content:space-between;align-items:center}.eyebrow{color:#5a8d70;font-size:10px;font-weight:700;letter-spacing:1.5px;margin:0 0 8px}.topbar h1{font-size:30px;letter-spacing:-1px;margin:0}.export-button{background:#173d29;color:#fff;border:0;border-radius:7px;padding:11px 17px;font-weight:bold;cursor:pointer}.toolbar{display:flex;justify-content:space-between;align-items:center;margin:28px 0 15px}.live-status{font-size:12px;color:#4d765f}.live-status span{display:inline-block;width:7px;height:7px;border-radius:50%;background:#45cb7d;margin-right:7px}.range-label{font-size:12px;color:#75867b}.range-label select{margin-left:8px;border:1px solid #d5e0d9;border-radius:6px;background:#fff;padding:8px 28px 8px 10px;color:#34443a}.metrics{display:grid;grid-template-columns:1.4fr repeat(3,1fr);gap:14px}.metric-card,.panel{background:#fff;border:1px solid #e0e9e3;border-radius:10px}.metric-card{min-height:142px;padding:21px}.metric-card.featured{background:#173d29;color:#fff;border-color:#173d29}.metric-label{font-size:12px;color:#738278;margin-bottom:12px}.featured .metric-label{color:#b6d4c0}.info{border:1px solid #9cb5a5;border-radius:50%;font-size:9px;padding:0 4px;margin-left:3px}.metric-value{font-size:28px;font-weight:700;letter-spacing:-1px}.metric-change{font-size:12px;margin-top:12px;font-weight:bold}.metric-change span{font-weight:normal;color:#8a9a90;margin-left:5px}.featured .metric-change span{color:#a6cbb3}.positive{color:#42b874}.sparkline{display:flex;align-items:end;height:22px;gap:4px;margin-top:10px}.sparkline i{width:12px;background:#56d487;border-radius:3px 3px 0 0}.sparkline i:nth-child(1){height:8px}.sparkline i:nth-child(2){height:12px}.sparkline i:nth-child(3){height:9px}.sparkline i:nth-child(4){height:15px}.sparkline i:nth-child(5){height:13px}.sparkline i:nth-child(6){height:18px}.sparkline i:nth-child(7){height:14px}.sparkline i:nth-child(8){height:20px}.sparkline i:nth-child(9){height:17px}.sparkline i:nth-child(10){height:22px}.grid-row{display:grid;grid-template-columns:1.55fr 1fr;gap:14px;margin-top:14px}.panel{padding:23px}.panel-heading{display:flex;justify-content:space-between;align-items:start}.panel h2{font-size:15px;margin:0 0 6px}.panel p{font-size:11px;color:#849188;margin:0}.chart-total{font-size:18px;font-weight:bold}.chart{display:flex;height:260px;margin-top:24px}.y-axis{width:42px;display:flex;flex-direction:column;justify-content:space-between;color:#9aa69e;font-size:10px;padding-bottom:24px}.chart-area{position:relative;flex:1}.grid-lines{position:absolute;inset:0 0 25px;background:repeating-linear-gradient(to bottom,#eaf0ec 0,#eaf0ec 1px,transparent 1px,transparent 25%)}svg{position:absolute;width:100%;height:calc(100% - 25px);left:0;top:0}.x-axis{position:absolute;bottom:0;left:0;right:0;display:flex;justify-content:space-between;color:#9aa69e;font-size:10px}.donut-wrap{display:flex;align-items:center;justify-content:space-around;margin-top:36px}.donut{width:154px;height:154px;border-radius:50%;background:conic-gradient(#55d68b 0 52%,#6ca8e8 52% 83%,#edb663 83% 100%);display:grid;place-content:center;text-align:center;position:relative}.donut:after{content:"";position:absolute;background:white;border-radius:50%;inset:20px}.donut strong,.donut small{position:relative;z-index:1}.donut strong{font-size:22px}.donut small{font-size:10px;color:#89958d;margin-top:4px}.legend{font-size:12px;color:#5d6c63;line-height:2.6}.legend div{white-space:nowrap}.legend strong{float:right;margin-left:25px;color:#18271e}.dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:8px}.green{background:#55d68b}.blue{background:#6ca8e8}.orange{background:#edb663}.orders-panel{margin-top:14px}.order-actions{display:flex;align-items:center;gap:18px}.order-actions input{border:1px solid #dce6df;border-radius:6px;padding:9px 12px;min-width:165px;font-size:11px}.order-actions a{color:#368b5c;text-decoration:none;font-size:12px;font-weight:bold}.table-wrap{overflow-x:auto;margin-top:22px}table{border-collapse:collapse;width:100%;font-size:12px}th{color:#8b978f;text-align:left;font-size:10px;font-weight:normal;padding:10px 12px;border-bottom:1px solid #e7eee9}td{padding:14px 12px;border-bottom:1px solid #eef3ef;color:#44554b}td strong{color:#1d2d24}td small{display:block;color:#a0aaa4;font-size:10px;margin-top:4px}.align-right{text-align:right}.status{font-size:10px;border-radius:12px;padding:5px 9px}.status.paid{background:#e2f7ea;color:#2b9a59}.status.pending{background:#fff4dd;color:#b17a23}.status.refunded{background:#f3e7e7;color:#b46060}.empty{text-align:center;padding:20px}@media(max-width:1000px){.content{padding:30px 20px}.metrics{grid-template-columns:repeat(2,1fr)}.grid-row{grid-template-columns:1fr}}@media(max-width:650px){.sidebar{width:64px;padding:20px 8px}.brand{margin:0 auto 45px}.brand span:last-child,.nav-item{font-size:0}.nav-item{text-align:center;padding:13px 0}.sidebar-footer{display:none}.metrics{grid-template-columns:1fr}.topbar h1{font-size:24px}.content{padding:24px 14px}.order-actions{align-items:end;flex-direction:column;gap:8px}.donut-wrap{gap:15px}.donut{width:125px;height:125px}}\n      `}</style>
-    </main>
+        <div style={styles.card}>
+          <h2 style={styles.cardTitle}>Active Buyers</h2>
+          <p style={styles.value}>{gmv.buyers.toLocaleString()}</p>
+        </div>
+
+        <div style={styles.card}>
+          <h2 style={styles.cardTitle}>Average Order Value</h2>
+          <p style={styles.value}>${gmv.aov.toLocaleString()}</p>
+        </div>
+      </div>
+
+      <h2 style={styles.chartTitle}>Weekly GMV Trend</h2>
+      <div style={styles.chart}>
+        {gmv.weekly.map((point: any, index: number) => (
+          <div key={index} style={styles.chartBarContainer}>
+            <div
+              style={{
+                ...styles.chartBar,
+                height: `${point.value / 1500}px`,
+              }}
+            ></div>
+            <p style={styles.chartLabel}>{point.day}</p>
+          </div>
+        ))}
+      </div>
+
+      <button style={styles.ctaButton}>
+        + Add Crop Listing
+      </button>
+    </div>
   );
 }
+
+const styles = {
+  container: {
+    padding: "40px",
+    fontFamily: "Arial, sans-serif",
+    maxWidth: "900px",
+    margin: "0 auto",
+  },
+  title: {
+    fontSize: "36px",
+    fontWeight: "bold",
+    marginBottom: "10px",
+  },
+  subtitle: {
+    fontSize: "18px",
+    color: "#555",
+    marginBottom: "30px",
+  },
+  grid: {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+    gap: "20px",
+    marginBottom: "40px",
+  },
+  card: {
+    padding: "20px",
+    borderRadius: "10px",
+    backgroundColor: "#f5f5f5",
+    textAlign: "center",
+    boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
+  },
+  cardTitle: {
+    fontSize: "18px",
+    marginBottom: "10px",
+  },
+  value: {
+    fontSize: "28px",
+    fontWeight: "bold",
+  },
+  chartTitle: {
+    fontSize: "24px",
+    marginBottom: "20px",
+  },
+  chart: {
+    display: "flex",
+    alignItems: "flex-end",
+    gap: "15px",
+    height: "200px",
+    marginBottom: "40px",
+  },
+  chartBarContainer: {
+    textAlign: "center",
+  },
+  chartBar: {
+    width: "30px",
+    backgroundColor: "#4CAF50",
+    borderRadius: "5px",
+    transition: "height 0.3s ease",
+  },
+  chartLabel: {
+    marginTop: "8px",
+    fontSize: "14px",
+  },
+  ctaButton: {
+    padding: "15px 25px",
+    fontSize: "18px",
+    backgroundColor: "#2E7D32",
+    color: "#fff",
+    border: "none",
+    borderRadius: "8px",
+    cursor: "pointer",
+  },
+};
