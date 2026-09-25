@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { requireAdminAuthorization } from "@/lib/auth/admin";
 import type { ShockScenario } from "@/lib/sse/types";
 
 export const dynamic = "force-dynamic";
@@ -122,33 +123,10 @@ const SCENARIOS: ShockScenario[] = [
 ];
 
 export async function GET(req: Request) {
-  // TEMPORARY DEVELOPMENT-ONLY GATE.
-  // This is not production authorization and must be replaced by a
-  // trusted server-side admin identity/session check.
-  const adminHeader = req.headers.get("x-admin");
+  const authorizationError = await requireAdminAuthorization(req);
 
-  if (adminHeader === null) {
-    return NextResponse.json(
-      { error: "Admin header required" },
-      {
-        status: 401,
-        headers: {
-          "Cache-Control": "no-store",
-        },
-      }
-    );
-  }
-
-  if (adminHeader !== "true") {
-    return NextResponse.json(
-      { error: "Invalid admin header" },
-      {
-        status: 403,
-        headers: {
-          "Cache-Control": "no-store",
-        },
-      }
-    );
+  if (authorizationError) {
+    return authorizationError;
   }
 
   const timestamp = Date.now();

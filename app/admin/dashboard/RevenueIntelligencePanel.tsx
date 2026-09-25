@@ -56,11 +56,6 @@ export default function RevenueIntelligencePanel() {
 
       try {
         const response = await fetch("/api/revenue-intelligence", {
-          // TEMPORARY DEVELOPMENT-ONLY HEADER.
-          // Do not treat this as production authorization.
-          headers: {
-            "x-admin": "true",
-          },
           signal: controller.signal,
         });
 
