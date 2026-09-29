@@ -8,3 +8,5 @@ backend's admin-only `/admin/stats` endpoint. Deployments must set
 `TFARMS_BACKEND_URL` (or a direct absolute `NEXT_PUBLIC_API_URL`) so this
 server-side check can return `200` for admins, `401` for unauthenticated
 requests, and `403` for authenticated non-admin requests.
+
+Deployment trigger: 2026-09-29
