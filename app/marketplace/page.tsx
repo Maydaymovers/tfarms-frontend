@@ -10,7 +10,10 @@ import {
 export default function MarketplacePage() {
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("All");
-  const categories = ["All", ...new Set(marketplaceProducts.map((item) => item.category))];
+  const categories = [
+    "All",
+    ...Array.from(new Set(marketplaceProducts.map((item) => item.category))),
+  ];
   const filteredProducts = useMemo(() => {
     const query = search.trim().toLowerCase();
     return marketplaceProducts.filter((product) => {
